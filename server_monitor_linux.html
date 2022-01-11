@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<title>Server Monitoring</title>
+	<meta name="viewport" content="width=device-width"/>
+	<link rel="stylesheet" href="server_monitor.css"/>
+</head>
+<script>
+	function MonitorThread(m) {
+		if(!m.update_timeout) {
+			const request = new XMLHttpRequest();
+					
+			request.onreadystatechange = function(event) {
+				if (request.readyState == 4){
+					if(request.status == 200){
+						var	json = request.response;
+						
+						if(m.bInitialized) {
+							m.SetCPU(json.cpu);
+							m.SetMEM(json.mem);
+						} else {
+							m.SetReport(json.os);
+							m.bInitialized	= true;
+						}
+						m.update_timeout	= 0;	// refresh rate (n+1) sec
+					} else {
+						if(m.bInitialized) {
+							m.bInitialized		= false;
+							m.SetCPU(0);
+							m.SetMEM(0);
+							m.SetReport("<font color='red'>- Off-line -</font>");
+						}
+						m.update_timeout	= 9;
+					}
+				}
+			}
+			request.open('GET', 'http://' + m.ip + ':8080/' + (m.bInitialized ? '1' : '0'), true);
+			request.responseType = 'json';
+			request.send();
+			
+			// maximize timeout
+			m.update_timeout	= 100;
+		} else {
+			m.update_timeout--;
+		}
+	}
+	
+	class ServerMonitor {
+		constructor(id, ip) {
+			this.ip					= ip;
+			this.update_timeout		= 0;
+			this.bInitialized		= false;
+			this.cpu_chart			= document.getElementById('cpu_' + id).contentWindow;
+			this.mem_chart			= document.getElementById('mem_' + id).contentWindow;
+			this.report				= document.getElementById('report_' + id);
+			setInterval(MonitorThread, 1000, this);
+		}
+		
+		SetCPU(v) {
+			this.cpu_chart.postMessage(v, '*');
+		}
+		
+		SetMEM(v) {
+			this.mem_chart.postMessage(v, '*');
+		}
+		
+		SetReport(v) {
+			this.report.innerHTML	= v;
+		}
+	}
+</script>
+<body>
+	<table width="100">
+	<tr>
+		<td><iframe id="cpu_0" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_0" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_1" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_1" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_2" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_2" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_3" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_3" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+	</tr>
+	<tr>
+		<td colspan=2 style="font-size:12px"><span id=title_0 style="font-size:13px;color:green">Server #1<br></span><span id="report_0" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_1 style="font-size:13px;color:green">Server #2<br></span><span id="report_1" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_2 style="font-size:13px;color:green">Server #3<br></span><span id="report_2" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_3 style="font-size:13px;color:green">Server #4<br></span><span id="report_3" style="font-size:10px">- Waiting -</span></td>
+	</tr>
+	
+	<tr>
+		<td colspan=8 style="border-top:2px dotted #CFCFCF;font-size:1px"></td>
+	</tr>
+	
+	<tr>
+		<td><iframe id="cpu_4" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_4" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_5" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_5" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_6" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_6" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_7" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_7" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+	</tr>
+	<tr>
+		<td colspan=2 style="font-size:12px"><span id=title_4 style="font-size:13px;color:green">Server #5<br></span><span id="report_4" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_5 style="font-size:13px;color:green">Server #6<br></span><span id="report_5" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_6 style="font-size:13px;color:green">Server #7<br></span><span id="report_6" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_7 style="font-size:13px;color:green">Server #8<br></span><span id="report_7" style="font-size:10px">- Waiting -</span></td>
+	</tr>
+	
+	<tr>
+		<td colspan=8 style="border-top:2px dotted #CFCFCF;font-size:1px"></td>
+	</tr>
+	
+	<tr>
+		<td><iframe id="cpu_8" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_8" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_9" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_9" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_10" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_10" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_11" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_11" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+	</tr>
+	<tr>
+		<td colspan=2 style="font-size:12px"><span id=title_8 style="font-size:13px;color:green">Server #9<br></span><span id="report_8" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_9 style="font-size:13px;color:green">Server #10<br></span><span id="report_9" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_10 style="font-size:13px;color:green">Server #11<br></span><span id="report_10" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_11 style="font-size:13px;color:green">Server #12<br></span><span id="report_11" style="font-size:10px">- Waiting -</span></td>
+	</tr>
+	
+	<tr>
+		<td colspan=8 style="border-top:2px dotted #CFCFCF;font-size:1px"></td>
+	</tr>
+	
+	<tr>
+		<td><iframe id="cpu_12" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_12" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_13" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_13" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"><iframe id="cpu_14" src="gage_chart.html?name=CPU" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td><iframe id="mem_14" src="gage_chart.html?name=RAM" width="90" height="90" frameborder=0 framespacing=0 marginheight=0 marginwidth=0 scrolling=no vspace=0></iframe></td>
+		<td style="border-left:1px solid #CFCFCF;"></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td colspan=2 style="font-size:12px"><span id=title_12 style="font-size:13px;color:green">Server #13<br></span><span id="report_12" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_13 style="font-size:13px;color:green">Server NAS<br></span><span id="report_13" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"><span id=title_14 style="font-size:13px;color:green">Server Common<br></span><span id="report_14" style="font-size:10px">- Waiting -</span></td>
+		<td colspan=2 style="border-left:1px solid #CFCFCF;font-size:12px"></td>
+	</tr>
+	</table>
+
+	<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script>
+		$(function() {
+			var sm = new ServerMonitor(4, "192.168.20.205");
+		});	
+	</script>
+</body>
+</html>

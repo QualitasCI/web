@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<title>Server Monitoring</title>
+	<meta name="viewport" content="width=device-width"/>
+	<link rel="stylesheet" href="gage_chart.css"/>
+</head>
+<script>
+	var getUrlParameter = function getUrlParameter(sParam) {
+		var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+			sURLVariables = sPageURL.split('&'),
+			sParameterName,
+			i;
+
+		for (i = 0; i < sURLVariables.length; i++) {
+			sParameterName = sURLVariables[i].split('=');
+
+			if (sParameterName[0] === sParam) {
+				return sParameterName[1] === undefined ? true : sParameterName[1];
+			}
+		}
+	};
+	var chart;
+</script>
+<body>
+	<div class="chart" data-percent="0">
+		<div class="percent"></div>
+		<div id="name" class="id_name">-</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+	<script src="https://www.jqueryscript.net/demo/easy-pie-chart/jquery.easypiechart.min.js"></script>
+	<script>
+		//https://www.jqueryscript.net/chart-graph/easy-pie-chart.html
+		$(function() {
+			document.getElementById("name").innerHTML = getUrlParameter("name");
+			$('.chart').easyPieChart({
+				easing: 'easeOutQuad',
+				size: 90,
+				onStep: function(from, to, percent) {
+					$(this.el).find('.percent').text(Math.round(percent));
+				}
+			});
+			chart = window.chart = $('.chart').data('easyPieChart');
+			/*$('.js_update').on('click', function() {
+				chart.update(Math.random()*200-100);
+			});*/
+			
+			window.addEventListener('message', function(e) {
+				//console.log(e.data); // { childData : 'test data' }
+				chart.update(e.data);
+				//if(e.data.childData === 'test data'){
+				//}
+			}, false);
+		});
+	</script>
+</body>
+</html>
