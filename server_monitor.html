@@ -4,7 +4,6 @@
 	<meta charset="UTF-8"/>
 	<title>Server Monitoring</title>
 	<meta name="viewport" content="width=device-width"/>
-	<meta http-equiv="Access-Control-Allow-Origin" content="192.168.20.*">
 	<link rel="stylesheet" href="server_monitor.css"/>
 </head>
 <script>
@@ -36,7 +35,7 @@
 					}
 				}
 			}
-			request.open('GET', 'http://' + m.ip + ':8080/' + (m.bInitialized ? '1' : '0'), true);
+			request.open('GET', 'https://' + m.ip + ':8080/' + (m.bInitialized ? '1' : '0'), true);
 			request.responseType = 'json';
 			request.send();
 			
